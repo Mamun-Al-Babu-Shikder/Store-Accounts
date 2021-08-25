@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
+    <meta name="author" content="AdminKit">
+    <meta name="keywords" content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="shortcut icon" href="img/icons/icon-48x48.png" />
+
+    <title>[[${selected_option}]] | Store Accounts</title>
+
+    <link href="css/app.css" rel="stylesheet">
+    <link href="css/modal.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+<div class="wrapper">
+
+    <div th:replace="sidebar::sidebar"></div>
+
+    <div class="main">
+
+        <div th:replace="topbar::top_bar"></div>
+
+        <main class="content">
+            <div class="container-fluid p-0">
+                <h1 class="h3 mb-3">[[${selected_option}]] > <a href="/">Dashboard</a></h1>
+                <div class="row">
+                    <div class="col-12 col-lg-12 col-xxl-12 d-flex">
+                        <div class="card flex-fill">
+                            <div class="card-header">
+                                <h5 style="float: left" class="card-title mb-0">[[${selected_option}]] List</h5>
+                                <button id="add_btn" style="float: right" class="btn btn-info"> <i class="plus"></i> Add</button>
+                            </div>
+
+                            <div style="padding: 10px" class="card-body" >
+                                <table id="product_table" class="display" style="width:100%">
+                                    <thead>
+                                    <tr>
+                                        <th>SL No.</th>
+                                        <th>Name</th>
+                                        <th>Unit Price</th>
+                                        <th>Stock</th>
+                                        <th>
+                                            <select class="input-group-text">
+                                                <option value="0">Select Category</option>
+                                                <option  th:each="category : ${categories}" value="${category.id}">[[${category.name}]]</option>
+                                            </select>
+                                        </th>
+                                        <th>Last Purchased</th>
+                                        <th>Last Sold</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tfoot>
+                                    <tr>
+                                        <th>SL No.</th>
+                                        <th>Name</th>
+                                        <th>Unit Price</th>
+                                        <th>Stock</th>
+                                        <th>Category</th>
+                                        <th>Last Purchased</th>
+                                        <th>Last Sold</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+
+        <div th:replace="footer::footer"></div>
+
+
+        <div class="modal" id="add_product" data-animation="slideInOutLeft">
+            <div class="modal-dialog" style="width: 400px">
+                <header class="modal-header">
+                    <span id="modal_title">Title</span>
+                    <button id="close_modal" class="close-modal" aria-label="close modal" data-close>
+                        ✕
+                    </button>
+                </header>
+
+
+
+                <form id="product_info_form" modelAttribute="product" method="post">
+                    <input id="product_id" type="hidden" name="id" value="0">
+                    <section class="modal-content">
+                        <div class="row">
+                            <div class="col-6">
+                                <p style="margin-bottom: 5px;">Product name</p>
+                                <input required style=" width: 100%" name="name" class="form-control" type="text" placeholder="Enter product name">
+                                <p class="small-error-mgs form-error" field-error="name"></p>
+                            </div>
+                            <div class="col-6">
+                                <p style="margin-bottom: 05px;">Product category</p>
+                                <select required style="width: 100%" id="category_name" name="category" class="input-group-text">
+                                    <option value="0">Select category</option>
+                                    <option  th:each="category : ${categories}" th:value="${category.id}">[[${category.name}]]</option>
+                                </select>
+                                <p class="small-error-mgs form-error" field-error="category"></p>
+                            </div>
+                            <div class="col-6">
+                                <p style="margin-top:10px; margin-bottom: 5px;">Product price</p>
+                                <input required style="width: 100%" name="price" class="form-control" type="number" placeholder="Enter product name">
+                                <p class="small-error-mgs form-error" field-error="price"></p>
+                            </div>
+                            <div class="col-6">
+                                <p style=" margin-top:10px; margin-bottom: 5px;">Current stock</p>
+                                <input required style="width: 100%" name="stock" class="form-control" type="number" placeholder="Enter product name">
+                                <p class="small-error-mgs form-error" field-error="stock"></p>
+                            </div>
+                        </div>
+                    </section>
+                </form>
+                    <footer class="modal-footer">
+                        <button type="submit" id="saveProduct" class="btn btn-success">Save</button>
+                        <button class="btn btn-danger" data-close>Cancel</button>
+                    </footer>
+            </div>
+        </div>
+
+
+
+
+    </div>
+</div>
+
+
+<script src="js/app.js"></script>
+<script src="js/moment.min.js"></script>
+<script src="js/modal.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="DataTables/datatables.css"/>
+<script type="text/javascript" src="DataTables/datatables.js"></script>
+
+<script th:inline="javascript" type="text/javascript">
+
+    const m = new Modal("add_product");
+    //let categories = [[${categories}]];
+    //categories = categories.map(c => c.name);
+
+    const data_table = $('#product_table').DataTable( {
+        "ajax": {
+            "type": "GET",
+            "url": "/fetch-products",
+            "data": {
+                cat: "MY-CAT"
+            }
+        },
+        "processing": true,
+        "serverSide": true,
+        "scrollX": true,
+        "scrollY": 300,
+        "columnDefs": [
+            {"className": "dt-center", "targets": "_all"}
+        ],
+        "columns": [
+            { "data" : "SL No.", "width" : "100px", render: function (data, type, row, meta){
+                    return meta.row + meta.settings._iDisplayStart + 1;
+                }
+            },
+            { "data": "name"},
+            { "data": "price", width: "150px"},
+            { "data": "stock"},
+            { "data": "category", orderable: false, render(categoty){
+                   return categoty.name;
+                }
+             },
+            { "data": "lastPurchased", width: "200px", render: function (date){
+                    if (date == null)
+                        return "---";
+                    return moment(date).local().format('DD MMM YYYY');
+                }
+            },
+            { "data": "lastSold", width: "150px", render: function (date){
+                    if (date == null)
+                        return "---";
+                    return moment(date).local().format('DD MMM YYYY');
+                }
+            },
+            { "data": "id", orderable: false, "width" : "250px", render: function (id){
+                    return '<button onclick="editProduct('+id+')" class="btn btn-outline-info btn-sm"> Edit </button> <button onclick="deleteProduct('+id+')" class="btn btn-outline-danger btn-sm"> Delete </button>';
+                }
+            }
+        ]
+    });
+
+    function isProductExist(name) {
+        showLoading();
+        $.get("/prodcut-exist", {name: name}, function (data){
+            if(data) {
+                hideLoading();
+                $("p[field-error='name']").text("Product name already exist.");
+            } else {
+                saveOrUpdateProduct();
+            }
+        });
+    }
+
+    function saveOrUpdateProduct() {
+        $(".form-error").text("");
+        showLoading();
+        const product = new FormData($("#product_info_form")[0]);
+        $.ajax({
+            url: "/save-product",
+            type: "POST",
+            data: product,
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function(resp) {
+                hideLoading();
+                if (resp.validationError != null) {
+                    $.each(resp.validationError, function (key, value){
+                        $("p[field-error='"+key+"']").text(value);
+                    });
+                } else if(resp.productExist) {
+                    $("p[field-error='name']").text("Product name already exist");
+                } else if(resp.error){
+                    m.close();
+                    openErrorDialog("Unexpected error occurred! Product couldn't saved");
+                } else {
+                    m.close();
+                    openSuccessDialog("Product successfully saved!");
+                    data_table.draw();
+                }
+            },
+            error: function(resp){
+                hideLoading();
+                openErrorDialog("Product can't save due to unexpected error!");
+            }
+        });
+    }
+
+    function editProduct(id) {
+        $("#product_id").val(id);
+        $("input[name='stock']").prop("readonly", true);
+        $(".form-error").text("");
+        $.get("/fetch-product", {id: id}, function(data){
+            if (data != null) {
+                $("#modal_title").text("Edit Product");
+                $("input[name='name']").val(data.name);
+                $("select[name='category']").val(data.category.id).attr("selected","selected");
+                $("input[name='price']").val(data.price);
+                $("input[name='stock']").val(data.stock);
+                m.open();
+            } else {
+                alert("Project not exist according to this ID");
+            }
+        });
+    }
+
+    function deleteProduct(id) {
+        showConfirmDialog("Are you sure. want to delete this product?", function (){
+            showLoading();
+            $.post("/delete-product", {id: id}, function (data){
+                hideLoading();
+                if(data) {
+                    data_table.draw();
+                    openSuccessDialog("Product successfully deleted");
+                } else {
+                    openErrorDialog("Product can't delete. Please try again later =");
+                }
+            });
+        });
+    }
+
+    $(document).ready(function(){
+
+        $("#add_btn").click(function(){
+            $("#product_id").val(0);
+            $("input[name='stock']").prop("readonly", false);
+            $("#product_info_form").trigger("reset");
+            $(".form-error").text("");
+            $("#modal_title").text("Add Category");
+            m.open();
+        });
+
+        $("#saveProduct").click(function (){
+            saveOrUpdateProduct();
+        });
+    });
+
+
+</script>
+
+</body>
+
+</html>

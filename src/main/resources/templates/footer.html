@@ -1,0 +1,88 @@
+<footer class="footer" th:fragment="footer" xmlns:th="http://www.w3.org/1999/xhtml">
+    <div class="container-fluid">
+        <div class="row text-muted">
+            <div class="col-6 text-start">
+                <p class="mb-0">
+                    <a class="text-muted" href="https://adminkit.io/" target="_blank"><strong>mCubeS IT Limited</strong></a> &copy;
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- confirm dialog -->
+    <div class="modal" id="dialog_confirm"  data-animation="slideInOutLeft">
+        <div class="modal-dialog" style="width: 400px">
+            <header class="modal-header" style="background-color:#3ac2ce; color:white">
+                <b>Confirm!</b>
+                <button class="close-modal" aria-label="close modal" data-close>
+                    ✕
+                </button>
+            </header>
+            <section class="modal-content">
+                <center>
+                    <p><strong style="color:#3ac2ce; " id="confirm_message"></strong></p>
+                </center>
+            </section>
+            <footer class="modal-footer">
+                <button id="yes_btn" class="btn btn-success " data-close>Yes</button>
+                <button class="btn btn-danger " data-close>No</button>
+            </footer>
+        </div>
+    </div>
+
+
+
+    <!-- success dialog -->
+    <div class="modal" id="dialog_success"  data-animation="slideInOutLeft">
+        <div class="modal-dialog" style="width: 400px">
+            <header class="modal-header" style="background-color:#6bbf6b; color:white">
+                <b>Success!</b>
+                <button class="close-modal" aria-label="close modal" data-close>
+                    ✕
+                </button>
+            </header>
+            <section class="modal-content">
+                <center>
+                    <p><strong style="color:green; " id="success_message"></strong></p>
+                </center>
+            </section>
+            <footer class="modal-footer">
+                <button class="btn btn-success " data-close>Done</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- success dialog -->
+    <div class="modal" id="dialog_error"  data-animation="slideInOutLeft">
+        <div class="modal-dialog" style="width: 400px">
+            <header class="modal-header" style="background-color:#e24d4d; color:white">
+                <b>Error!</b>
+                <button class="close-modal" aria-label="close modal" data-close>
+                    ✕
+                </button>
+            </header>
+            <section class="modal-content">
+                <center>
+                    <p><strong style="color:red; " id="error_message"></strong></p>
+                </center>
+            </section>
+            <footer class="modal-footer">
+                <button class="btn btn-danger" data-close>Cancel</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- loading dialog -->
+    <div class="modal" id="dialog_loading" style="z-index: 9" data-animation="slideInOutLeft">
+        <div class="modal-dialog" >
+            <section class="modal-content">
+                <center>
+                    <img style="width: 50px; height: 50px" src="/img/icons/loading-buffering.gif">
+                </center>
+            </section>
+        </div>
+    </div>
+
+
+
+</footer>

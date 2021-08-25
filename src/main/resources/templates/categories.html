@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
+    <meta name="author" content="AdminKit">
+    <meta name="keywords" content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="shortcut icon" href="img/icons/icon-48x48.png" />
+
+    <title>[[${selected_option}]] | Store Accounts</title>
+
+    <link href="css/app.css" rel="stylesheet">
+    <link href="css/modal.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+
+    <style>
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+    </style>
+
+</head>
+
+<body>
+<div class="wrapper">
+
+    <div th:replace="sidebar::sidebar"></div>
+
+    <div class="main">
+
+        <div th:replace="topbar::top_bar"></div>
+
+        <main class="content">
+            <div class="container-fluid p-0">
+                <h1 class="h3 mb-3">[[${selected_option}]] > <a href="#">Dashboard</a></h1>
+                <div class="row">
+                    <div class="col-12 col-lg-12 col-xxl-12 d-flex">
+                        <div class="card flex-fill">
+                            <div class="card-header">
+                                <h5 style="float: left" class="card-title mb-0">[[${selected_option}]] List</h5>
+                                <button id="add_btn" style="float: right" class="btn btn-info"> <i class="plus"></i> Add</button>
+                            </div>
+
+                            <div style="padding: 10px" class="card-body" >
+                                <table id="example" class="display" style="width:100%">
+                                    <thead>
+                                    <tr>
+                                        <th>SL No.</th>
+                                        <th>Name</th>
+                                        <th>Added Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tfoot>
+                                    <tr>
+                                        <th>SL No.</th>
+                                        <th>Name</th>
+                                        <th>Added Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+
+        <div th:replace="footer::footer"></div>
+
+        <div class="modal" id="add_category" data-animation="slideInOutLeft">
+            <div class="modal-dialog" style="width: 400px">
+                <header class="modal-header">
+                    <span id="modal_title">Title</span>
+                    <button id="close_modal" class="close-modal" aria-label="close modal" data-close>
+                        ✕
+                    </button>
+                </header>
+                <section class="modal-content">
+                    <p>Category name:</p>
+                    <input type="hidden" id="category_id" value="0">
+                    <input style="margin-bottom: 10px; width: 100%" id="category_name" name="category" class="form-control" type="text" placeholder="Enter category name">
+                    <center><span id="category_exist_error" style="display: none; text-align: center; font-size: 12px; color: #e83e3e;">Category name all ready exist.</span></center>
+                </section>
+                <footer class="modal-footer">
+                    <button id="saveCategory" class="btn btn-success">Save</button>
+                    <button class="btn btn-danger" data-close>Cancel</button>
+                </footer>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="js/app.js"></script>
+<script src="js/moment.min.js"></script>
+<script src="js/modal.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="DataTables/datatables.css"/>
+<script type="text/javascript" src="DataTables/datatables.js"></script>
+
+<script th:inline="javascript" type="text/javascript">
+
+    const m = new Modal("add_category");
+
+    const data_table = $('#example').DataTable( {
+        "ajax": "/fetch-categories",
+        "processing": true,
+        "serverSide": true,
+        "scrollY": 300,
+        "columns": [
+            { "data" : "SL No.","width" : "100px", render: function (data, type, row, meta){
+                    return meta.row + meta.settings._iDisplayStart + 1;
+                }
+            },
+            { "data": "name"},
+            { "data": "date", render: function (date){
+                   return moment(date).local().format('DD MMMM YYYY, h:mm:ss a');
+                }
+            },
+            { "data": "data", orderable: false, "width" : "100px", render: function (data, type, row){
+                    return '<button onclick="editCategory('+row['id']+',\''+row['name']+'\')" class="btn btn-outline-info btn-sm"> Edit </button> <button onclick="deleteCategory('+row['id']+')" class="btn btn-outline-danger btn-sm"> Delete </button>';
+                }
+            }
+        ]
+    });
+
+    function categoryExistCheck(category) {
+        showLoading();
+        $.post("/category-exist", {name: category}, function (data){
+            hideLoading();
+            if(data) {
+                $("#category_exist_error").show();
+            } else {
+                $("#category_exist_error").hide();
+                saveOrUpdateCategory(category);
+            }
+        });
+    }
+
+    function saveOrUpdateCategory(category) {
+        if (category !== '') {
+            m.close();
+            showLoading();
+            const id = $("#category_id").val();
+            $.post("/sava-category", {id:id, name:category}, function (data){
+                hideLoading();
+                if (data) {
+                    data_table.draw();
+                    $("#category_name").val("");
+                    openSuccessDialog("Category '"+category+"' successfully saved. Thanks");
+                } else {
+                    openErrorDialog("Can't save category '"+category+"', Please try again");
+                }
+            });
+        }
+    }
+
+    function editCategory(id, name) {
+        $("#modal_title").text("Edit Category");
+        $("#category_id").val(id);
+        $("#category_name").val(name);
+        m.open();
+    }
+
+    function deleteCategory(id) {
+        showConfirmDialog("Are you sure. want to delete this category?", function (){
+            showLoading();
+            $.post("/delete-category", {id: id}, function (data){
+                hideLoading();
+                if(data) {
+                    data_table.draw();
+                    openSuccessDialog("Category successfully deleted");
+                } else {
+                    openErrorDialog("Category can't delete. Maybe this category associated with any product");
+                }
+            });
+        });
+    }
+
+    $(document).ready(function(){
+
+        $("#add_btn").click(function(){
+            $("#category_id").val(0);
+            $("#modal_title").text("Add Category");
+            m.open();
+        });
+
+        $("#saveCategory").click(function (){
+            const category = $("#category_name").val().trim();
+            categoryExistCheck(category);
+        });
+    });
+
+</script>
+</body>
+</html>
