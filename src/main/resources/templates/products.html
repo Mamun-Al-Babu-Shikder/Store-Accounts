@@ -17,7 +17,8 @@
     <link href="css/app.css" rel="stylesheet">
     <link href="css/modal.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-
+    <link href="css/font-awesome.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -32,12 +33,13 @@
         <main class="content">
             <div class="container-fluid p-0">
                 <h1 class="h3 mb-3">[[${selected_option}]] > <a href="/">Dashboard</a></h1>
+
                 <div class="row">
                     <div class="col-12 col-lg-12 col-xxl-12 d-flex">
                         <div class="card flex-fill">
                             <div class="card-header">
                                 <h5 style="float: left" class="card-title mb-0">[[${selected_option}]] List</h5>
-                                <button id="add_btn" style="float: right" class="btn btn-info"> <i class="plus"></i> Add</button>
+                                <button id="add_btn" style="float: right" class="btn btn-info"> <i class="fa fa-plus"></i> Add</button>
                             </div>
 
                             <div style="padding: 10px" class="card-body" >
@@ -48,12 +50,7 @@
                                         <th>Name</th>
                                         <th>Unit Price</th>
                                         <th>Stock</th>
-                                        <th>
-                                            <select class="input-group-text">
-                                                <option value="0">Select Category</option>
-                                                <option  th:each="category : ${categories}" value="${category.id}">[[${category.name}]]</option>
-                                            </select>
-                                        </th>
+                                        <th>Category</th>
                                         <th>Last Purchased</th>
                                         <th>Last Sold</th>
                                         <th>Action</th>
@@ -84,7 +81,7 @@
 
         <div th:replace="footer::footer"></div>
 
-
+        <!-- Dialog for add/edit product -->
         <div class="modal" id="add_product" data-animation="slideInOutLeft">
             <div class="modal-dialog" style="width: 400px">
                 <header class="modal-header">
@@ -93,9 +90,6 @@
                         ✕
                     </button>
                 </header>
-
-
-
                 <form id="product_info_form" modelAttribute="product" method="post">
                     <input id="product_id" type="hidden" name="id" value="0">
                     <section class="modal-content">
@@ -133,6 +127,71 @@
             </div>
         </div>
 
+        <!-- Dialog for import product -->
+        <div class="modal" id="import_product" data-animation="slideInOutLeft">
+            <div class="modal-dialog" style="width: 400px">
+                <header class="modal-header">
+                    <span>Import Product</span>
+                    <button id="close_modal2" class="close-modal" aria-label="close modal" data-close>
+                        ✕
+                    </button>
+                </header>
+                <form method="post">
+                    <input id="product_id2" type="hidden" name="id" value="0">
+                    <section class="modal-content">
+                        <div class="row">
+                            <div class="col-12">
+                                <p style="margin-bottom: 5px;">Quantity</p>
+                                <input required style=" width: 100%" id="import_quantity" class="form-control" type="number" maxlength="3" placeholder="Enter quantity">
+                                <p class="small-error-mgs form-error" field-error="import_quantity"></p>
+                            </div>
+<!--                            <div class="col-6">-->
+<!--                                <p style="margin-bottom: 5px;">Current stock</p>-->
+<!--                                <input required style="width: 100%" name="stock" class="form-control" type="number" placeholder="Enter product name">-->
+<!--                                <p class="small-error-mgs form-error" field-error="stock"></p>-->
+<!--                            </div>-->
+                        </div>
+                    </section>
+                </form>
+                <footer class="modal-footer">
+                    <button type="submit" id="saveImport" class="btn btn-success">Import</button>
+                    <button class="btn btn-danger" data-close>Cancel</button>
+                </footer>
+            </div>
+        </div>
+
+        <!-- Dialog for sell product -->
+        <div class="modal" id="sell_product" data-animation="slideInOutLeft">
+            <div class="modal-dialog" style="width: 400px">
+                <header class="modal-header">
+                    <span>Sell Product</span>
+                    <button id="close_modal3" class="close-modal" aria-label="close modal" data-close>
+                        ✕
+                    </button>
+                </header>
+                <form method="post">
+                    <input id="product_id3" type="hidden" name="id" value="0">
+                    <section class="modal-content">
+                        <div class="row">
+                            <div class="col-6">
+                                <p style="margin-bottom: 5px;">Unit Price</p>
+                                <input required style="width: 100%" id="sell_unit_price" class="form-control" type="number" placeholder="Enter unit price">
+                                <p class="small-error-mgs form-error" field-error="stock"></p>
+                            </div>
+                            <div class="col-6">
+                                <p style="margin-bottom: 5px;">Quantity</p>
+                                <input required style=" width: 100%" id="sell_quantity" class="form-control" type="number" maxlength="3" placeholder="Enter quantity">
+                                <p class="small-error-mgs form-error" field-error="sell_quantity"></p>
+                            </div>
+                        </div>
+                    </section>
+                </form>
+                <footer class="modal-footer">
+                    <button type="submit" id="saveSell" class="btn btn-success">Sell</button>
+                    <button class="btn btn-danger" data-close>Cancel</button>
+                </footer>
+            </div>
+        </div>
 
 
 
@@ -149,7 +208,9 @@
 
 <script th:inline="javascript" type="text/javascript">
 
-    const m = new Modal("add_product");
+    const addProductDialog = new Modal("add_product");
+    const importProductDialog = new Modal("import_product");
+    const sellProductDialog = new Modal("sell_product");
     //let categories = [[${categories}]];
     //categories = categories.map(c => c.name);
 
@@ -176,7 +237,7 @@
             { "data": "name"},
             { "data": "price", width: "150px"},
             { "data": "stock"},
-            { "data": "category", orderable: false, render(categoty){
+            { "data": "category", render(categoty){
                    return categoty.name;
                 }
              },
@@ -192,8 +253,11 @@
                     return moment(date).local().format('DD MMM YYYY');
                 }
             },
-            { "data": "id", orderable: false, "width" : "250px", render: function (id){
-                    return '<button onclick="editProduct('+id+')" class="btn btn-outline-info btn-sm"> Edit </button> <button onclick="deleteProduct('+id+')" class="btn btn-outline-danger btn-sm"> Delete </button>';
+            { "data": "id", orderable: false, "width" : "280px", render: function (id){
+                    return '<button title="Edit Product" onclick="editProduct('+id+')" class="btn btn-outline-info btn-sm"> <i class="fa fa-pencil"></i> </button> ' +
+                        '<button title="Delete Product" onclick="deleteProduct('+id+')" class="btn btn-outline-danger btn-sm"> <i class="fa fa-trash"></i> </button> ' +
+                        '<button title="Import Product" onclick="importProduct('+id+')" class="btn btn-outline-warning btn-sm"> <i class="fa fa-arrow-down"></i> </button> ' +
+                        '<button title="Sell Product" onclick="sellProduct('+id+')" class="btn btn-outline-success btn-sm"> <i class="fa fa-arrow-up"></i> </button>';
                 }
             }
         ]
@@ -231,10 +295,10 @@
                 } else if(resp.productExist) {
                     $("p[field-error='name']").text("Product name already exist");
                 } else if(resp.error){
-                    m.close();
+                    addProductDialog.close();
                     openErrorDialog("Unexpected error occurred! Product couldn't saved");
                 } else {
-                    m.close();
+                    addProductDialog.close();
                     openSuccessDialog("Product successfully saved!");
                     data_table.draw();
                 }
@@ -257,7 +321,7 @@
                 $("select[name='category']").val(data.category.id).attr("selected","selected");
                 $("input[name='price']").val(data.price);
                 $("input[name='stock']").val(data.stock);
-                m.open();
+                addProductDialog.open();
             } else {
                 alert("Project not exist according to this ID");
             }
@@ -279,6 +343,14 @@
         });
     }
 
+    function importProduct(id) {
+        importProductDialog.open();
+    }
+
+    function sellProduct(id) {
+        sellProductDialog.open();
+    }
+
     $(document).ready(function(){
 
         $("#add_btn").click(function(){
@@ -287,7 +359,7 @@
             $("#product_info_form").trigger("reset");
             $(".form-error").text("");
             $("#modal_title").text("Add Category");
-            m.open();
+            addProductDialog.open();
         });
 
         $("#saveProduct").click(function (){
