@@ -120,74 +120,6 @@
             </div>
         </div>
 
-        <!-- Dialog for import product -->
-        <div class="modal" id="import_product" data-animation="slideInOutLeft">
-            <div class="modal-dialog" style="width: 400px">
-                <header class="modal-header">
-                    <span>Import Product</span>
-                    <button id="close_modal2" class="close-modal" aria-label="close modal" data-close>
-                        ✕
-                    </button>
-                </header>
-                <form method="post">
-                    <input id="product_id2" type="hidden" name="id" value="0">
-                    <section class="modal-content">
-                        <div class="row">
-                            <div class="col-12">
-                                <p style="margin-bottom: 5px;">Quantity</p>
-                                <input required style=" width: 100%" id="import_quantity" class="form-control" type="number" maxlength="3" placeholder="Enter quantity">
-                                <p class="small-error-mgs form-error" field-error="import_quantity"></p>
-                            </div>
-                            <!--                            <div class="col-6">-->
-                            <!--                                <p style="margin-bottom: 5px;">Current stock</p>-->
-                            <!--                                <input required style="width: 100%" name="stock" class="form-control" type="number" placeholder="Enter product name">-->
-                            <!--                                <p class="small-error-mgs form-error" field-error="stock"></p>-->
-                            <!--                            </div>-->
-                        </div>
-                    </section>
-                </form>
-                <footer class="modal-footer">
-                    <button type="submit" id="saveImport" class="btn btn-success">Import</button>
-                    <button class="btn btn-danger" data-close>Cancel</button>
-                </footer>
-            </div>
-        </div>
-
-        <!-- Dialog for sell product -->
-        <div class="modal" id="sell_product" data-animation="slideInOutLeft">
-            <div class="modal-dialog" style="width: 400px">
-                <header class="modal-header">
-                    <span>Sell Product</span>
-                    <button id="close_modal3" class="close-modal" aria-label="close modal" data-close>
-                        ✕
-                    </button>
-                </header>
-                <form method="post">
-                    <input id="product_id3" type="hidden" name="id" value="0">
-                    <section class="modal-content">
-                        <div class="row">
-                            <div class="col-6">
-                                <p style="margin-bottom: 5px;">Unit Price</p>
-                                <input required style="width: 100%" id="sell_unit_price" class="form-control" type="number" placeholder="Enter unit price">
-                                <p class="small-error-mgs form-error" field-error="stock"></p>
-                            </div>
-                            <div class="col-6">
-                                <p style="margin-bottom: 5px;">Quantity</p>
-                                <input required style=" width: 100%" id="sell_quantity" class="form-control" type="number" maxlength="3" placeholder="Enter quantity">
-                                <p class="small-error-mgs form-error" field-error="sell_quantity"></p>
-                            </div>
-                        </div>
-                    </section>
-                </form>
-                <footer class="modal-footer">
-                    <button type="submit" id="saveSell" class="btn btn-success">Sell</button>
-                    <button class="btn btn-danger" data-close>Cancel</button>
-                </footer>
-            </div>
-        </div>
-
-
-
     </div>
 </div>
 
@@ -202,7 +134,6 @@
 <script th:inline="javascript" type="text/javascript">
 
     const addTransactionDialog = new Modal("add_transactions");
-
 
     const transactions_table = $('#transaction_table').DataTable( {
         "ajax": {
@@ -259,7 +190,6 @@
         });
     }
 
-
     $(document).ready(function (){
 
         $("#add_btn").click(function (){
@@ -303,122 +233,6 @@
         });
 
     });
-
-
-    /*
-    const addProductDialog = new Modal("add_product");
-    const importProductDialog = new Modal("import_product");
-    const sellProductDialog = new Modal("sell_product");
-    //let categories = [[${categories}]];
-    //categories = categories.map(c => c.name);
-
-
-    function isProductExist(name) {
-        showLoading();
-        $.get("/prodcut-exist", {name: name}, function (data){
-            if(data) {
-                hideLoading();
-                $("p[field-error='name']").text("Product name already exist.");
-            } else {
-                saveOrUpdateProduct();
-            }
-        });
-    }
-
-    function saveOrUpdateProduct() {
-        $(".form-error").text("");
-        showLoading();
-        const product = new FormData($("#product_info_form")[0]);
-        $.ajax({
-            url: "/save-product",
-            type: "POST",
-            data: product,
-            cache: false,
-            processData: false,
-            contentType: false,
-            success: function(resp) {
-                hideLoading();
-                if (resp.validationError != null) {
-                    $.each(resp.validationError, function (key, value){
-                        $("p[field-error='"+key+"']").text(value);
-                    });
-                } else if(resp.productExist) {
-                    $("p[field-error='name']").text("Product name already exist");
-                } else if(resp.error){
-                    addProductDialog.close();
-                    openErrorDialog("Unexpected error occurred! Product couldn't saved");
-                } else {
-                    addProductDialog.close();
-                    openSuccessDialog("Product successfully saved!");
-                    data_table.draw();
-                }
-            },
-            error: function(resp){
-                hideLoading();
-                openErrorDialog("Product can't save due to unexpected error!");
-            }
-        });
-    }
-
-    function editProduct(id) {
-        $("#product_id").val(id);
-        $("input[name='stock']").prop("readonly", true);
-        $(".form-error").text("");
-        $.get("/fetch-product", {id: id}, function(data){
-            if (data != null) {
-                $("#modal_title").text("Edit Product");
-                $("input[name='name']").val(data.name);
-                $("select[name='category']").val(data.category.id).attr("selected","selected");
-                $("input[name='price']").val(data.price);
-                $("input[name='stock']").val(data.stock);
-                addProductDialog.open();
-            } else {
-                alert("Project not exist according to this ID");
-            }
-        });
-    }
-
-    function deleteProduct(id) {
-        showConfirmDialog("Are you sure. want to delete this product?", function (){
-            showLoading();
-            $.post("/delete-product", {id: id}, function (data){
-                hideLoading();
-                if(data) {
-                    data_table.draw();
-                    openSuccessDialog("Product successfully deleted");
-                } else {
-                    openErrorDialog("Product can't delete. Please try again later =");
-                }
-            });
-        });
-    }
-
-    function importProduct(id) {
-        importProductDialog.open();
-    }
-
-    function sellProduct(id) {
-        sellProductDialog.open();
-    }
-
-    $(document).ready(function(){
-
-        $("#add_btn").click(function(){
-            $("#product_id").val(0);
-            $("input[name='stock']").prop("readonly", false);
-            $("#product_info_form").trigger("reset");
-            $(".form-error").text("");
-            $("#modal_title").text("Add Category");
-            addProductDialog.open();
-        });
-
-        $("#saveProduct").click(function (){
-            saveOrUpdateProduct();
-        });
-    });
-
-     */
-
 
 </script>
 
