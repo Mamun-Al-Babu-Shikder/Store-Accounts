@@ -19,8 +19,8 @@ import java.util.Date;
 public class Product {
 
     @Id
-    @SequenceGenerator(name = "sequence", sequenceName = "product_sequence")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @SequenceGenerator(name = "product_sequence", sequenceName = "product_sequence")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_sequence")
     private long id;
     private int userId;
     @ManyToOne(targetEntity = Category.class, cascade = CascadeType.PERSIST)

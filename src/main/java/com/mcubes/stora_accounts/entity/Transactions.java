@@ -22,8 +22,8 @@ public class Transactions {
     }
 
     @Id
-    @SequenceGenerator(name = "sequence", sequenceName = "transactions_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @SequenceGenerator(name = "transactions_sequence", sequenceName = "transactions_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "transactions_sequence")
     private long id;
     @NotBlank(message = "Description can't blank")
     private String description;

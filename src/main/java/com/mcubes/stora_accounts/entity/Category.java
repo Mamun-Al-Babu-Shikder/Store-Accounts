@@ -15,8 +15,8 @@ import java.util.Date;
 public class Category {
 
     @Id
-    @SequenceGenerator(name = "sequence", sequenceName = "category_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @SequenceGenerator(name = "category_sequence", sequenceName = "category_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "category_sequence")
     private long id;
     private String name;
     private Date date;
