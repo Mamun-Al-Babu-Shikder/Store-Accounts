@@ -1,9 +1,11 @@
 package com.mcubes.stora_accounts.service;
 
 import com.mcubes.stora_accounts.entity.Product;
+import com.mcubes.stora_accounts.entity.Transactions;
 import com.mcubes.stora_accounts.model.DataTable;
 import com.mcubes.stora_accounts.repository.CategoryRepository;
 import com.mcubes.stora_accounts.repository.ProductRepository;
+import com.mcubes.stora_accounts.repository.TransactionsRepository;
 import com.mcubes.stora_accounts.util.Utils;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,7 @@ public class ProductService {
     private Utils utils;
     private CategoryRepository categoryRepository;
     private ProductRepository productRepository;
+    private TransactionsRepository transactionsRepository;
 
     public Product getProductById(long id) {
        Product product = productRepository.findByIdAndUserId(id, utils.getLoginUserId());
@@ -48,8 +51,20 @@ public class ProductService {
         if (id == 0) {
             product.setUserId(userId);
             product.setName(product.getName().trim());
-            product.setLastPurchased(product.getStock() > 0 ? new Date() : null);
+            Date date = new Date();
+            product.setLastPurchased(product.getStock() > 0 ? date : null);
             productRepository.save(product);
+            if (product.getStock() > 0) {
+                Transactions transactions = new Transactions();
+                transactions.setDescription(product.getName() + " ( " + product.getStock()+ " )");
+                transactions.setProductId(product.getId());
+                transactions.setQuantity(product.getStock());
+                transactions.setAmount(product.getPrice() * product.getStock());
+                transactions.setType(Transactions.Type.EXPENDITURE);
+                transactions.setDate(date);
+                transactions.setUserId(userId);
+                transactionsRepository.save(transactions);
+            }
             success = true;
         } else {
             Product existingProduct = productRepository.findByIdAndUserId(id, userId);
@@ -76,4 +91,66 @@ public class ProductService {
         return success;
     }
 
+    @Transactional
+    public boolean updateProductStockForImport(long id, int quantity) {
+        boolean success = true;
+        try {
+           // productRepository.updateProductStock(id, quantity, utils.getLoginUserId());
+            int userId = utils.getLoginUserId();
+            Date date = new Date();
+            Product product = productRepository.findByIdAndUserId(id, userId);
+            product.setStock(product.getStock() + quantity);
+            product.setLastPurchased(date);
+            
+            Transactions transactions = new Transactions();
+            transactions.setDescription(product.getName() + " (" + quantity + ")");
+            transactions.setProductId(product.getId());
+            transactions.setQuantity(quantity);
+            transactions.setAmount(product.getPrice() * quantity);
+            transactions.setDate(date);
+            transactions.setType(Transactions.Type.EXPENDITURE);
+            transactions.setUserId(userId);
+
+            productRepository.save(product);
+            transactionsRepository.save(transactions);
+
+        } catch (Exception e) {
+            success = false;
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    @Transactional
+    public boolean updateProductStockForSell(long id, int quantity, float totalCostForSell) {
+        boolean success = true;
+        try {
+            int userId = utils.getLoginUserId();
+            Date date = new Date();
+            Product product = productRepository.findByIdAndUserId(id, userId);
+            product.setStock(product.getStock() - quantity);
+            product.setLastSold(date);
+
+            Transactions transactions = new Transactions();
+            transactions.setDescription(product.getName() + " (" + quantity + ")");
+            transactions.setProductId(product.getId());
+            transactions.setQuantity(quantity);
+            transactions.setAmount(totalCostForSell);
+            transactions.setDate(date);
+            transactions.setType(Transactions.Type.INCOME);
+            transactions.setUserId(userId);
+
+            productRepository.save(product);
+            transactionsRepository.save(transactions);
+
+        } catch (Exception e){
+            success = false;
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    public int getAvailableStock(long id) {
+        return productRepository.getAvailableSock(id, utils.getLoginUserId());
+    }
 }

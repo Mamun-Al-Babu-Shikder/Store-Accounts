@@ -98,4 +98,41 @@ public class ProductController {
         return productService.deleteProduct(id);
     }
 
+    @ResponseBody
+    @PostMapping("/import-product")
+    public ResponseEntity<Map<String, Object>> importProduct(@RequestParam long id, @RequestParam int quantity) {
+        Map<String, Object> response = new HashMap<>();
+        boolean error = true;
+        if (id < 1 || quantity < 1 || quantity > 100) {
+            response.put("error_message", "Invalid product id or quantity");
+        } else if(!productService.updateProductStockForImport(id, quantity)) {
+            response.put("error_message", "Can't update product stock, Please try again later");
+        } else {
+            error = false;
+        }
+        response.put("error", error);
+        return ResponseEntity.ok(response);
+    }
+
+    @ResponseBody
+    @PostMapping("/sell-product")
+    public ResponseEntity<Map<String, Object>> sellProduct(@RequestParam long id, @RequestParam int quantity,
+                                                           @RequestParam float cost) {
+        Map<String, Object> response = new HashMap<>();
+        boolean error = true;
+        if (id < 1 || quantity < 1 || quantity > 100 || cost < 1) {
+            response.put("error_message", "Entered invalid information");
+        } else {
+            int currentStock = productService.getAvailableStock(id);
+            if (quantity > currentStock) {
+                response.put("error_message", "Quantity is too high against current stock");
+            } else if(!productService.updateProductStockForSell(id, quantity, cost)) {
+                response.put("error_message", "Can't update the sell information");
+            } else {
+                error = false;
+            }
+        }
+        response.put("error", error);
+        return ResponseEntity.ok(response);
+    }
 }

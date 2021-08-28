@@ -43,28 +43,26 @@
                             </div>
 
                             <div style="padding: 10px" class="card-body" >
-                                <table id="product_table" class="display" style="width:100%">
+                                <table id="transaction_table" class="display" style="width:100%">
                                     <thead>
                                     <tr>
                                         <th>SL No.</th>
-                                        <th>Name</th>
-                                        <th>Unit Price</th>
-                                        <th>Stock</th>
-                                        <th>Category</th>
-                                        <th>Last Purchased</th>
-                                        <th>Last Sold</th>
+                                        <th>Description</th>
+                                        <th>Type</th>
+                                        <th></th>
+                                        <th>Amount</th>
+                                        <th>Date</th>
                                         <th>Action</th>
                                     </tr>
                                     </thead>
                                     <tfoot>
                                     <tr>
                                         <th>SL No.</th>
-                                        <th>Name</th>
-                                        <th>Unit Price</th>
-                                        <th>Stock</th>
-                                        <th>Category</th>
-                                        <th>Last Purchased</th>
-                                        <th>Last Sold</th>
+                                        <th>Description</th>
+                                        <th>Type</th>
+                                        <th></th>
+                                        <th>Amount</th>
+                                        <th>Date</th>
                                         <th>Action</th>
                                     </tr>
                                     </tfoot>
@@ -81,49 +79,44 @@
 
         <div th:replace="footer::footer"></div>
 
-        <!-- Dialog for add/edit product -->
-        <div class="modal" id="add_product" data-animation="slideInOutLeft">
+        <!-- Dialog for add transaction -->
+        <div class="modal" id="add_transactions" data-animation="slideInOutLeft">
             <div class="modal-dialog" style="width: 400px">
                 <header class="modal-header">
-                    <span id="modal_title">Title</span>
+                    <span id="modal_title">Add New Transaction</span>
                     <button id="close_modal" class="close-modal" aria-label="close modal" data-close>
                         ✕
                     </button>
                 </header>
-                <form id="product_info_form" modelAttribute="product" method="post">
+                <form id="transaction_info_form" modelAttribute="transactions" method="post">
                     <input id="product_id" type="hidden" name="id" value="0">
                     <section class="modal-content">
                         <div class="row">
-                            <div class="col-6">
+                            <div class="col-12">
                                 <p style="margin-bottom: 5px;">Product name</p>
-                                <input required style=" width: 100%" name="name" class="form-control" type="text" placeholder="Enter product name">
-                                <p class="small-error-mgs form-error" field-error="name"></p>
+                                <input required style=" width: 100%" name="description" class="form-control" type="text" placeholder="Enter transaction description">
+                                <p class="small-error-mgs form-error" field-error="description"></p>
                             </div>
                             <div class="col-6">
-                                <p style="margin-bottom: 05px;">Product category</p>
-                                <select required style="width: 100%" id="category_name" name="category" class="input-group-text">
-                                    <option value="0">Select category</option>
-                                    <option  th:each="category : ${categories}" th:value="${category.id}">[[${category.name}]]</option>
+                                <p style="margin-top:10px; margin-bottom: 05px;">Transaction Type</p>
+                                <select required style="width: 100%" name="type" class="input-group-text">
+                                    <option value="0">Select type</option>
+                                    <option th:each="type : ${transactions_type}" th:value="${type}">[[${type.name}]]</option>
                                 </select>
-                                <p class="small-error-mgs form-error" field-error="category"></p>
+                                <p class="small-error-mgs form-error" field-error="type"></p>
                             </div>
                             <div class="col-6">
                                 <p style="margin-top:10px; margin-bottom: 5px;">Product price</p>
-                                <input required style="width: 100%" name="price" class="form-control" type="number" placeholder="Enter product name">
-                                <p class="small-error-mgs form-error" field-error="price"></p>
-                            </div>
-                            <div class="col-6">
-                                <p style=" margin-top:10px; margin-bottom: 5px;">Current stock</p>
-                                <input required style="width: 100%" name="stock" class="form-control" type="number" placeholder="Enter product name">
-                                <p class="small-error-mgs form-error" field-error="stock"></p>
+                                <input required style="width: 100%" name="amount" class="form-control" type="number" placeholder="Enter amount of money">
+                                <p class="small-error-mgs form-error" field-error="amount"></p>
                             </div>
                         </div>
                     </section>
                 </form>
-                    <footer class="modal-footer">
-                        <button type="submit" id="saveProduct" class="btn btn-success">Save</button>
-                        <button class="btn btn-danger" data-close>Cancel</button>
-                    </footer>
+                <footer class="modal-footer">
+                    <button type="submit" id="saveTransactions" class="btn btn-success">Save</button>
+                    <button class="btn btn-danger" data-close>Cancel</button>
+                </footer>
             </div>
         </div>
 
@@ -142,9 +135,14 @@
                         <div class="row">
                             <div class="col-12">
                                 <p style="margin-bottom: 5px;">Quantity</p>
-                                <input required style=" width: 100%" id="import_quantity" class="form-control" type="number" maxlength="3" placeholder="Enter quantity (1 to 100)">
+                                <input required style=" width: 100%" id="import_quantity" class="form-control" type="number" maxlength="3" placeholder="Enter quantity">
                                 <p class="small-error-mgs form-error" field-error="import_quantity"></p>
                             </div>
+                            <!--                            <div class="col-6">-->
+                            <!--                                <p style="margin-bottom: 5px;">Current stock</p>-->
+                            <!--                                <input required style="width: 100%" name="stock" class="form-control" type="number" placeholder="Enter product name">-->
+                            <!--                                <p class="small-error-mgs form-error" field-error="stock"></p>-->
+                            <!--                            </div>-->
                         </div>
                     </section>
                 </form>
@@ -166,21 +164,17 @@
                 </header>
                 <form method="post">
                     <input id="product_id3" type="hidden" name="id" value="0">
-                    <p id="sell_product_name">Product Name</p>
                     <section class="modal-content">
                         <div class="row">
                             <div class="col-6">
-                                <p style="margin-bottom: 5px;">Quantity</p>
-                                <input required style=" width: 100%" id="sell_quantity" class="form-control" type="number" maxlength="3" placeholder="Enter quantity (1 to 100)">
-                                <p class="small-error-mgs form-error" field-error="sell_quantity"></p>
+                                <p style="margin-bottom: 5px;">Unit Price</p>
+                                <input required style="width: 100%" id="sell_unit_price" class="form-control" type="number" placeholder="Enter unit price">
+                                <p class="small-error-mgs form-error" field-error="stock"></p>
                             </div>
                             <div class="col-6">
-                                <p style="margin-bottom: 5px;">Total Cost</p>
-                                <input required style="width: 100%" id="total_cost" class="form-control" type="number" placeholder="Enter total cost">
-                                <p class="small-error-mgs form-error" field-error="total_cost"></p>
-                            </div>
-                            <div class="col-12">
-                                <p class="small-error-mgs form-error" id="sell_product_error"></p>
+                                <p style="margin-bottom: 5px;">Quantity</p>
+                                <input required style=" width: 100%" id="sell_quantity" class="form-control" type="number" maxlength="3" placeholder="Enter quantity">
+                                <p class="small-error-mgs form-error" field-error="sell_quantity"></p>
                             </div>
                         </div>
                     </section>
@@ -207,19 +201,13 @@
 
 <script th:inline="javascript" type="text/javascript">
 
-    const addProductDialog = new Modal("add_product");
-    const importProductDialog = new Modal("import_product");
-    const sellProductDialog = new Modal("sell_product");
-    //let categories = [[${categories}]];
-    //categories = categories.map(c => c.name);
+    const addTransactionDialog = new Modal("add_transactions");
 
-    const data_table = $('#product_table').DataTable( {
+
+    const transactions_table = $('#transaction_table').DataTable( {
         "ajax": {
             "type": "GET",
-            "url": "/fetch-products",
-            "data": {
-                cat: "MY-CAT"
-            }
+            "url": "/fetch-transactions",
         },
         "processing": true,
         "serverSide": true,
@@ -233,34 +221,97 @@
                     return meta.row + meta.settings._iDisplayStart + 1;
                 }
             },
-            { "data": "name"},
-            { "data": "price", width: "150px"},
-            { "data": "stock"},
-            { "data": "category", render(categoty){
-                   return categoty.name;
-                }
-             },
-            { "data": "lastPurchased", width: "200px", render: function (date){
-                    if (date == null)
-                        return "---";
-                    return moment(date).local().format('DD MMM YYYY');
+            { "data": "description" },
+            { "data": "type" },
+            { "data": "type",  orderable: false, render: function (data){
+                   if (data === 'INCOME') {
+                       return '<i style="color: green" class="fa fa-arrow-down"></i>';
+                   } else {
+                       return '<i style="color: red" class="fa fa-arrow-up"></i>';
+                   }
                 }
             },
-            { "data": "lastSold", width: "150px", render: function (date){
-                    if (date == null)
-                        return "---";
-                    return moment(date).local().format('DD MMM YYYY');
+            { "data": "amount"},
+            { "data": "date", render: function (data) {
+                   return moment(data).local().format('DD MMM YYYY');
                 }
             },
-            { "data": "id", orderable: false, "width" : "280px", render: function (id, type, row, meta){
-                    return '<button title="Edit Product" onclick="editProduct('+id+')" class="btn btn-outline-info btn-sm"> <i class="fa fa-pencil"></i> </button> ' +
-                        '<button title="Delete Product" onclick="deleteProduct('+id+')" class="btn btn-outline-danger btn-sm"> <i class="fa fa-trash"></i> </button> ' +
-                        '<button title="Import Product" onclick="importProduct('+id+')" class="btn btn-outline-warning btn-sm"> <i class="fa fa-arrow-down"></i> </button> ' +
-                        '<button title="Sell Product" onclick="sellProduct('+id+',\''+row.name+'\')" class="btn btn-outline-success btn-sm"> <i class="fa fa-arrow-up"></i> </button>';
+            {
+                "data": "id", orderable: false, render: function (id) {
+                    return '<button title="Delete Product" onclick="deleteTransaction(' + id + ')" class="btn btn-outline-danger btn-sm"> DELETE </button> ';
                 }
             }
         ]
     });
+
+    function deleteTransaction(id) {
+        showConfirmDialog("Are you sure. want to delete this transaction?", function (){
+            showLoading();
+            $.post("/delete-transactions", {id: id}, function (data){
+                hideLoading();
+                if(data) {
+                    transactions_table.draw();
+                    openSuccessDialog("Transaction successfully deleted");
+                } else {
+                    openErrorDialog("Transaction can't delete. May be stock not available or other internal error occurred");
+                }
+            });
+        });
+    }
+
+
+    $(document).ready(function (){
+
+        $("#add_btn").click(function (){
+            $(".form-error").text("");
+            addTransactionDialog.open();
+        });
+
+
+        $("#saveTransactions").click(function (){
+            showLoading();
+            $(".form-error").text("");
+            const transactions = new FormData($("#transaction_info_form")[0]);
+            $.ajax({
+                url: "/save-transactions",
+                type: "POST",
+                data: transactions,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (resp) {
+                    hideLoading();
+                    if (resp.validationError != null) {
+                        $.each(resp.validationError, function (key, value) {
+                            $("p[field-error='"+key+"']").text(value);
+                        });
+                    } else if(resp.error) {
+                        addTransactionDialog.close();
+                        openErrorDialog("Unexpected error occurred! Can't save information");
+                    } else {
+                        addTransactionDialog.close();
+                        openSuccessDialog("Successfully saved transaction information");
+                        transactions_table.draw();
+                    }
+                },
+                error: function(err) {
+                    addTransactionDialog.close();
+                    hideLoading();
+                    openErrorDialog("Unexpected error occurred! Can't save information");
+                }
+            });
+        });
+
+    });
+
+
+    /*
+    const addProductDialog = new Modal("add_product");
+    const importProductDialog = new Modal("import_product");
+    const sellProductDialog = new Modal("sell_product");
+    //let categories = [[${categories}]];
+    //categories = categories.map(c => c.name);
+
 
     function isProductExist(name) {
         showLoading();
@@ -343,14 +394,10 @@
     }
 
     function importProduct(id) {
-        $("#product_id2").val(id);
-        $('p[field-error="import_quantity"]').text("");
         importProductDialog.open();
     }
 
-    function sellProduct(id, name) {
-        $("#product_id3").val(id);
-        $("#sell_product_name").text("Product : " + name);
+    function sellProduct(id) {
         sellProductDialog.open();
     }
 
@@ -368,39 +415,9 @@
         $("#saveProduct").click(function (){
             saveOrUpdateProduct();
         });
-
-        $("#saveImport").click(function(){
-            const id = $("#product_id2").val();
-            const quantity = $("#import_quantity").val();
-            showLoading();
-            $.post("/import-product", {id: id, quantity: quantity}, function (resp){
-                hideLoading();
-                if (resp.error) {
-                    $('p[field-error="import_quantity"]').text(resp.error_message);
-                } else {
-                    importProductDialog.close();
-                    data_table.draw();
-                }
-            });
-        });
-
-        $("#saveSell").click(function (){
-            const id = $("#product_id3").val();
-            const quantity = $("#sell_quantity").val();
-            const total_cost = $("#total_cost").val();
-            showLoading();
-            $.post("/sell-product", {id: id, quantity: quantity, cost: total_cost}, function (resp){
-                hideLoading()
-                if (resp.error) {
-                    $("#sell_product_error").text(resp.error_message);
-                } else {
-                    sellProductDialog.close();
-                    data_table.draw();
-                }
-            });
-        });
-
     });
+
+     */
 
 
 </script>
