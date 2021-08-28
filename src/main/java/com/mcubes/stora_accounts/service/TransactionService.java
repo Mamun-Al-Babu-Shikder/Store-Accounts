@@ -12,7 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -78,5 +80,15 @@ public class TransactionService {
             e.printStackTrace();
         }
         return success;
+    }
+
+    public List<Transactions> getTransactionsChartData() {
+        List<Transactions> transactions = Collections.emptyList();
+        try {
+            transactions = transactionsRepository.findByUserId(utils.getLoginUserId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return transactions;
     }
 }

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
+    <meta name="author" content="AdminKit">
+    <meta name="keywords" content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="shortcut icon" href="img/icons/icon-48x48.png" />
+
+    <title>[[${selected_option}]] | Store Accounts</title>
+
+    <link href="css/app.css" rel="stylesheet">
+    <link href="css/modal.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="css/font-awesome.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <script src="js/highchart/highstock.js"></script>
+    <script src="js/highchart/exporting.js"></script>
+
+<!--    <script src="https://code.highcharts.com/modules/export-data.js"></script>-->
+<!--    <script src="https://code.highcharts.com/modules/accessibility.js"></script>-->
+
+</head>
+
+<body>
+<div class="wrapper">
+
+    <div th:replace="sidebar::sidebar"></div>
+
+    <div class="main">
+
+        <div th:replace="topbar::top_bar"></div>
+
+        <main class="content">
+            <div class="container-fluid p-0">
+                <h1 class="h3 mb-3">[[${selected_option}]] > <a href="/">Dashboard</a></h1>
+                <div class="row">
+                    <div class="col-12 col-lg-12 col-xxl-12 d-flex">
+                        <div class="card flex-fill">
+                            <div class="card-header">
+                                <h5 style="float: left" class="card-title mb-0">Transactions Column Chart</h5>
+                                <button id="add_btn" style="float: right" class="btn btn-info"> <i class="fa fa-plus"></i> Add</button>
+                            </div>
+                            <div style="padding: 10px" class="card-body" >
+                                <figure class="highcharts-figure">
+                                    <div id="container"></div>
+                                </figure>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div th:replace="footer::footer"></div>
+
+    </div>
+</div>
+
+
+<script src="js/app.js"></script>
+<script src="js/moment.min.js"></script>
+<script src="js/modal.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="DataTables/datatables.css"/>
+<script type="text/javascript" src="DataTables/datatables.js"></script>
+
+<script th:inline="javascript" type="text/javascript">
+
+
+    $(document).ready(function (){
+        fetchTransactionsChartData();
+    });
+
+    function fetchTransactionsChartData() {
+        $.get("/fetch-transactions-chart-data", function (resp){
+            let data = [];
+            $.each(resp, function (index, value){
+                //alert(value.date+", "+value.description);
+                data.push([moment(value.date).format("DD-MM-YY")
+               // +" ["+(index)+"]"
+                    , value.amount]);
+            });
+            initTransactionsColumnChart(data);
+        });
+    }
+
+    function initTransactionsColumnChart(data) {
+
+        Highcharts.chart('container', {
+            credits: {
+                enabled: false
+            },
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Transactions Information With Chart'
+            },
+            subtitle: {
+                text: 'Source: <a href="/transactions">Transactions Table</a>'
+            },
+            xAxis: {
+                type: 'category',
+                labels: {
+                    rotation: -45,
+                    style: {
+                        fontSize: '13px',
+                        fontFamily: 'Verdana, sans-serif'
+                    }
+                },
+                min: 0,
+                max: 15,
+                scrollbar: {
+                    enabled: true
+                },
+                tickLength: 0
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Amount of Money (Taka)'
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            tooltip: {
+                pointFormat: 'Transactions: <b>{point.y:.1f} Taka</b>'
+            },
+            series: [{
+                name: 'Transactions',
+                data: data,
+                dataLabels: {
+                    enabled: true,
+                    rotation: -90,
+                    color: '#FFFFFF',
+                    align: 'right',
+                    format: '{point.y:.1f}', // one decimal
+                    y: 10, // 10 pixels down from the top
+                    style: {
+                        fontSize: '10px',
+                        fontFamily: 'Verdana, sans-serif'
+                    }
+                }
+            }]
+        });
+
+
+    }
+
+</script>
+
+</body>
+
+</html>

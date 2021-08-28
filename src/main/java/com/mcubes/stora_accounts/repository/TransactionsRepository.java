@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface TransactionsRepository extends JpaRepository<Transactions, Long> {
 
@@ -14,4 +16,6 @@ public interface TransactionsRepository extends JpaRepository<Transactions, Long
     Page<Transactions> findSearchAndPageableTransactionsByUserId(int userId, String search, Pageable pageable);
 
     Transactions findByIdAndUserId(long id, int userId);
+
+    List<Transactions> findByUserId(int userId);
 }
