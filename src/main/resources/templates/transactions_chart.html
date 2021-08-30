@@ -19,12 +19,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="css/font-awesome.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/daterangepicker.css" />
 
     <script src="js/highchart/highstock.js"></script>
     <script src="js/highchart/exporting.js"></script>
 
-<!--    <script src="https://code.highcharts.com/modules/export-data.js"></script>-->
-<!--    <script src="https://code.highcharts.com/modules/accessibility.js"></script>-->
 
 </head>
 
@@ -43,13 +42,57 @@
                 <div class="row">
                     <div class="col-12 col-lg-12 col-xxl-12 d-flex">
                         <div class="card flex-fill">
-                            <div class="card-header">
-                                <h5 style="float: left" class="card-title mb-0">Transactions Column Chart</h5>
-                                <button id="add_btn" style="float: right" class="btn btn-info"> <i class="fa fa-plus"></i> Add</button>
+                            <div class="card-body" >
+                                <div class="row" style="padding: 0px 10px">
+                                    <div class="col-sm-6 col-md-3" style="padding: 5px">
+                                        <div style="border-left: 2px solid #1da1f2;padding: 5px; background-color: rgba(49,113,167,0.12)">
+                                            <h6 style="padding: 0; margin: 0"><b>Select Range</b></h6>
+                                            <span class="fa fa-calendar"></span>
+                                            <input style="width: 90%; border: none; background-color: transparent" type="text" name="dates" value="01/01/2018 - 01/15/2018"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-md-3" style="padding: 5px">
+                                        <div style="border-left: 2px solid #284358;padding: 5px; background-color: rgba(19,19,19,0.12)">
+                                            <h6 style="padding: 0; margin: 0"><b>Select filter</b></h6>
+                                            <span style="float: left; margin-top: 3px" class="fa fa-filter"></span>
+                                            <select style=" width: 90%; border: none; background-color: transparent; padding:1px;" type="text" class="input-group-text" >
+                                                <option value="all">All</option>
+                                                <option value="product">Product</option>
+                                                <option value="others">Others</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-md-3" style="padding: 5px; ">
+                                        <div style="border-left: 2px solid #1da1f2;padding: 5px; background-color: rgba(49,113,167,0.12)">
+                                            <h6 style="padding: 0; margin: 0"><b>Total Income</b></h6>
+                                            <p style="padding: 0; margin: 0"><span class="fa fa-dollar"></span> <span id="total_income">0</span> Tk</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-md-3" style="padding: 5px">
+                                        <div style="border-left: 2px solid #284358;padding: 5px; background-color: rgba(19,19,19,0.12)">
+                                            <h6 style="padding: 0; margin: 0"><b>Total Expenditure</b></h6>
+                                            <p style="padding: 0; margin: 0"><span class="fa fa-dollar"></span> <span id="total_expenditure">0</span> Tk</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+
+                    </div>
+                    <div class="col-12 col-lg-12 col-xxl-12 d-flex">
+                        <div class="card flex-fill">
                             <div style="padding: 10px" class="card-body" >
                                 <figure class="highcharts-figure">
-                                    <div id="container"></div>
+                                    <div id="chart1"></div>
+                                </figure>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-12 col-xxl-12 d-flex">
+                        <div class="card flex-fill">
+                            <div style="padding: 10px" class="card-body" >
+                                <figure class="highcharts-figure">
+                                    <div id="chart2"></div>
                                 </figure>
                             </div>
                         </div>
@@ -70,30 +113,84 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <link rel="stylesheet" type="text/css" href="DataTables/datatables.css"/>
 <script type="text/javascript" src="DataTables/datatables.js"></script>
+<script src="js/daterangepicker.js"></script>
 
 <script th:inline="javascript" type="text/javascript">
 
+    var test = null;
+    let date = new Date();
+    let start_date = moment(new Date(date.setDate(1))).format('YYYY-MM-DD');
+    let end_date = moment(new Date(date.setDate(30))).format('YYYY-MM-DD');
+    let filter_value = "All";
 
-    $(document).ready(function (){
-        fetchTransactionsChartData();
+    const colors = {
+        "INCOME" : "#298be0",
+        "EXPENDITURE" : "#1e2c3d"
+    }
+
+    $(function() {
+        $('input[name="dates"]').daterangepicker({
+            opens: 'left'
+        }, function(start, end) {
+            start_date = start.format('YYYY-MM-DD');
+            end_date = end.format('YYYY-MM-DD');
+            fetchTransactionsChartData(start_date, end_date, filter_value);
+        });
     });
 
-    function fetchTransactionsChartData() {
-        $.get("/fetch-transactions-chart-data", function (resp){
-            let data = [];
-            $.each(resp, function (index, value){
-                //alert(value.date+", "+value.description);
-                data.push([moment(value.date).format("DD-MM-YY")
-               // +" ["+(index)+"]"
-                    , value.amount]);
-            });
-            initTransactionsColumnChart(data);
+    $(document).ready(function (){
+
+       // alert(start_date+", "+end_date);
+
+
+
+        fetchTransactionsChartData(start_date, end_date, filter_value);
+    });
+
+    function groupingDataBy(data, key) {
+        return data.reduce(
+            function(result, value){
+                if(!result[value[key]]) {
+                    result[value[key]] = [];
+                }
+                result[value[key]].push(value);
+                return result;
+            }, {});
+    }
+
+    function groupingDataByDate(data) {
+        return data.reduce(
+            function(result, value){
+                let date = new Date(value.date).toLocaleDateString();
+                if(!result[date]) {
+                    result[date] = [];
+                }
+                result[date].push(value);
+                return result;
+            }, {});
+    }
+
+    function fetchTransactionsChartData(start_date, end_date, filter_value) {
+        showLoading();
+        $.get("/fetch-transactions-chart-data",
+            {startDate: start_date, endDate: end_date, filterValue: filter_value}, function (resp){
+            hideLoading();
+            initTransactionsColumnChart(resp);
+            initTotalIncomeExpenditureChart(resp);
         });
     }
 
-    function initTransactionsColumnChart(data) {
+    function initTransactionsColumnChart(transactions) {
 
-        Highcharts.chart('container', {
+        let data = [];
+        $.each(transactions, function (index, value){
+            let name = new Date(value.date).toLocaleDateString() +" ["+(index)+"]";
+            let amount = value.amount;
+            let color = colors[value.type];
+            data.push({name: name, y: amount, color: color});
+        });
+
+        Highcharts.chart('chart1', {
             credits: {
                 enabled: false
             },
@@ -101,7 +198,7 @@
                 type: 'column'
             },
             title: {
-                text: 'Transactions Information With Chart'
+                text: 'Transactions Information Chart'
             },
             subtitle: {
                 text: 'Source: <a href="/transactions">Transactions Table</a>'
@@ -132,11 +229,120 @@
                 enabled: false
             },
             tooltip: {
-                pointFormat: 'Transactions: <b>{point.y:.1f} Taka</b>'
+                formatter: function () {
+                    const value = transactions[this.x];
+                    console.log("TYPE : " + value.type);
+                    return "<strong>Description: </strong> " + value.description +
+                        "<br>" + "<strong>Amount: </strong> " + value.amount + " Taka" ;
+                       // "<br>" + "<strong>Type: </strong> " + value.type;
+                }
             },
             series: [{
-                name: 'Transactions',
+                name: '',
+                colorByPoint: true,
+                dataLabels: {
+                    enabled: true,
+                    rotation: -90,
+                    color: '#FFFFFF',
+                    align: 'right',
+                    format: '{point.y:.1f}', // one decimal
+                    y: 10, // 10 pixels down from the top
+                    style: {
+                        fontSize: '10px',
+                        fontFamily: 'Verdana, sans-serif'
+                    }
+                },
                 data: data,
+            }]
+        });
+
+
+    }
+
+    function initTotalIncomeExpenditureChart(transactions) {
+
+        const dataSet = groupingDataByDate(transactions);
+        const categories = Object.keys(dataSet);
+        const incomes = [];
+        const expenditures = [];
+        let total_income = 0;
+        let total_expenditure = 0;
+
+        $.each(dataSet, function(key, values){
+            let incomeAmounts = 0;
+            let expenditureAmounts = 0;
+            $.each(values, function(index, value){
+                if (value.type == 'INCOME'){
+                    incomeAmounts += value.amount;
+                } else if(value.type == 'EXPENDITURE') {
+                    expenditureAmounts += value.amount;
+                }
+            });
+            incomes.push(incomeAmounts);
+            expenditures.push(expenditureAmounts);
+            total_income += incomeAmounts;
+            total_expenditure += expenditureAmounts;
+        });
+
+        $("#total_income").text(total_income);
+        $("#total_expenditure").text(total_expenditure);
+
+
+        Highcharts.chart('chart2', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Income-Expenditure Information Chart'
+            },
+            subtitle: {
+                text: 'Source: <a href="/transactions">Transactions Table</a>'
+            },
+            xAxis: {
+                categories: categories,
+                labels: {
+                    rotation: -45,
+                    style: {
+                        fontSize: '13px',
+                        fontFamily: 'Verdana, sans-serif'
+                    }
+                },
+                min: 0,
+                max: 7,
+                scrollbar: {
+                    enabled: true
+                },
+                tickLength: 0
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Amount of Money (Taka)'
+                }
+            },
+            credits: {
+                enabled: false
+            },
+            series: [{
+                name: 'Income',
+                color: colors["INCOME"],
+                data: incomes,
+                dataLabels: {
+                    enabled: true,
+                    rotation: -90,
+                    color: '#FFFFFF',
+                    align: 'right',
+                    format: '{point.y:.1f}', // one decimal
+                    y: 10, // 10 pixels down from the top
+                    style: {
+                        fontSize: '10px',
+                        fontFamily: 'Verdana, sans-serif'
+                    }
+                }
+            }, {
+                name: 'Expenditure',
+                color: colors["EXPENDITURE"],
+                data: expenditures,
                 dataLabels: {
                     enabled: true,
                     rotation: -90,
@@ -151,8 +357,6 @@
                 }
             }]
         });
-
-
     }
 
 </script>

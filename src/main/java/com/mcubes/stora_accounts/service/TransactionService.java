@@ -82,9 +82,14 @@ public class TransactionService {
         return success;
     }
 
-    public List<Transactions> getTransactionsChartData() {
+    public List<Transactions> getTransactionsChartData(String startDate, String endDate, String filter) {
         List<Transactions> transactions = Collections.emptyList();
         try {
+            /*
+            transactions = transactionsRepository.findByDateFilterAndUserId(startDate, endDate,
+                    utils.getLoginUserId());
+
+             */
             transactions = transactionsRepository.findByUserId(utils.getLoginUserId());
         } catch (Exception e) {
             e.printStackTrace();

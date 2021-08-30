@@ -17,5 +17,8 @@ public interface TransactionsRepository extends JpaRepository<Transactions, Long
 
     Transactions findByIdAndUserId(long id, int userId);
 
-    List<Transactions> findByUserId(int userId);
+    @Query("select t from Transactions t where t.userId = ?3 and (?1 is not null or t.date > ?1) and (?2 is not null or t.date < ?2)")
+    List<Transactions> findByDateFilterAndUserId(String startDate, String endDate, int userId);
+
+    List<Transactions> findByUserId(int userid);
 }
